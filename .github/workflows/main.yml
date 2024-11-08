@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to cPanel
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.public_html/nestapp.mayanappventure.mx }}
+          username: ${{ secrets.angel@mayanappventure.mx }}
+          password: ${{ secrets.ASm13108*# }}
+          exclude: |
+            .git*
+            .gitignore
+            README.md
