@@ -18,7 +18,7 @@ import { Cabana } from './entities/cabana.entity';
     password: '', 
     database: 'treslagunas', 
     autoLoadEntities: true, 
-    synchronize: true, 
+    synchronize: false, 
     entities: [Cabana],
     }),
   CabanasModule
