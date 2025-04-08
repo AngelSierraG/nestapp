@@ -1,4 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Partner } from 'src/partners/entities/partner.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { ForeignKeyMetadata } from 'typeorm/metadata/ForeignKeyMetadata';
 
 @Entity('Users')
 export class User {
@@ -23,6 +25,9 @@ export class User {
   @Column({ length: 255, nullable: true })
   PhotoUrl: string;
 
+  @ManyToOne(() => Partner, partner => partner.users) @JoinColumn({ name: 'PartnerId' })  
+  Partner: Partner
+  
   @Column({ default: false })
   IsDeleted: boolean;
 

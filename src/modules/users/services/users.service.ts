@@ -4,27 +4,32 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/user.entity';
 import { UserDto } from '../dto/user.dto';
 import { AuthService } from '../../auth/auth.service'; // Importar el servicio de autenticación
+import { Partner } from 'src/partners/entities/partner.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(Partner)
+    private partnerRepository: Repository<Partner>,
     @Inject(forwardRef(() => AuthService))
     private authService: AuthService, // Inyectar el servicio de autenticación
   ) {}
 
-  async create(createUserDto: UserDto): Promise<User> {
-    const user = new User();
-    user.Username = createUserDto.username;
-    user.PasswordHash = await this.authService.hashPassword(createUserDto.passwordHash); // Hashear la contraseña
-    console.log(createUserDto.passwordHash)
-    console.log(user.PasswordHash)
-    user.Email = createUserDto.email;
-    user.PhoneNumber = createUserDto.phoneNumber;
-    user.Address = createUserDto.address;
-    user.PhotoUrl = createUserDto.photoUrl;
+  async create(createUserDto: UserDto): Promise<User> { 
+
+    const { PartnerId, ...userData } = createUserDto; 
+
+    const partner = await this.partnerRepository.findOne({ where: { PartnerId } }); 
+
+    if (!partner) { 
+      throw new Error('Partner not found'); 
+    } 
+    const user = this.usersRepository.create({ ...userData, Partner: partner, }); 
+
     return this.usersRepository.save(user);
+    
   }
 
   findAll(): Promise<User[]> {
@@ -38,17 +43,25 @@ export class UsersService {
   }
 
   async update(id: number, updateUserDto: UserDto): Promise<User> {
-    const user = await this.findOne(id);
-    user.Username = updateUserDto.username;
-    if (updateUserDto.passwordHash) {
-      user.PasswordHash = await this.authService.hashPassword(updateUserDto.passwordHash); // Hashear la contraseña
-    }
-    user.Email = updateUserDto.email;
-    user.PhoneNumber = updateUserDto.phoneNumber;
-    user.Address = updateUserDto.address;
-    user.PhotoUrl = updateUserDto.photoUrl;
-    await this.usersRepository.update(id, user);
-    return this.findOne(id);
+    const { PartnerId, ...userData } = updateUserDto; 
+    const user = await this.usersRepository.findOne({ where: { UserId: id } }); 
+
+    if (!user) { 
+      throw new Error('User not found'); 
+    } 
+
+    if (PartnerId !== undefined) {
+      const partner = await this.partnerRepository.findOne({ where: { PartnerId } });
+
+      if (!partner) {
+        throw new Error('Partner not found'); 
+      } 
+      user.Partner = partner; 
+    } 
+
+    Object.assign(user, userData); 
+    return this.usersRepository.save(user);
+
   }
 
   async remove(id: number): Promise<void> {

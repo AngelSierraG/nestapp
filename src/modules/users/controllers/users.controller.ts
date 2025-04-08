@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, UseGuards, Patch } from '@nestjs/common';
 import { ApiTags, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { UsersService } from '../services/users.service';
 import { User } from '../entities/user.entity';
@@ -18,33 +18,33 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  //@UseGuards(JwtAuthGuard)
+  //@ApiBearerAuth()
   @Get()
   @ApiResponse({ status: 200, description: 'Return all users.', type: [User] })
   findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  //@UseGuards(JwtAuthGuard)
+  //@ApiBearerAuth()
   @Get(':id')
   @ApiResponse({ status: 200, description: 'Return a single user.', type: User })
   findOne(@Param('id') id: string): Promise<User> {
     return this.usersService.findOne(Number(id));
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Put(':id')
+  //@UseGuards(JwtAuthGuard)
+  //@ApiBearerAuth()
+  @Patch(':id')
   @ApiBody({ type: UserDto })
   @ApiResponse({ status: 200, description: 'The user has been successfully updated.' })
   update(@Param('id') id: string, @Body() updateUserDto: UserDto): Promise<User> {
     return this.usersService.update(Number(id), updateUserDto);
   }
 
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
+  //@UseGuards(JwtAuthGuard)
+  //@ApiBearerAuth()
   @Delete(':id')
   @ApiResponse({ status: 200, description: 'The user has been successfully deleted.' })
   remove(@Param('id') id: string): Promise<void> {

@@ -18,4 +18,7 @@ export class UserDto {
 
   @ApiProperty({ required: false })
   photoUrl?: string;
+
+  @ApiProperty({ required: true})
+  PartnerId: number
 }
