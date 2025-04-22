@@ -13,7 +13,7 @@ import * as passport from 'passport'; // Importa passport
 @Module({
   imports: [TypeOrmModule.forRoot({ 
     type: 'mysql', 
-    host: 'localhost', 
+    host: '107.180.46.184', 
     port: 3306, 
     //username: 'root',
     username: 'chiapuf8_angel', 
