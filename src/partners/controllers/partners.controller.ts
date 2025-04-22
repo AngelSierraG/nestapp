@@ -1,14 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { PartnersService } from '../services/partners.service';
 import { PartnerDto } from '../dto/partner.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import * as Multer from 'multer';
+
 
 @Controller('partners')
 export class PartnersController {
   constructor(private readonly partnersService: PartnersService) {}
 
   @Post()
-  create(@Body() createPartnerDto: PartnerDto) {
-    return this.partnersService.create(createPartnerDto);
+  @UseInterceptors(FileInterceptor('photo', {
+    storage: diskStorage({
+      destination: './uploads', // Carpeta donde se guardan los archivos
+      filename: (req, file, cb) => {
+        const uniqueName = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueName);
+      }
+    })
+  }))
+
+  create(@Body() createPartnerDto: PartnerDto,
+  @UploadedFile() photoFile: Multer.File
+  ) {
+    return this.partnersService.create(createPartnerDto, photoFile);
   }
 
   @Get()
