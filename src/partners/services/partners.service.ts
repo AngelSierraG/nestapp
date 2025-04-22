@@ -3,6 +3,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Partner } from '../entities/partner.entity';
 import { PartnerDto } from '../dto/partner.dto';
+import * as Multer from 'multer';
+
+
+
 
 @Injectable()
 export class PartnersService {
@@ -11,10 +15,15 @@ export class PartnersService {
     private partnersRepository: Repository<Partner>,
   ) {}
 
-  create(createPartnerDto: PartnerDto): Promise<Partner> {
-    const partner = this.partnersRepository.create(createPartnerDto);
+  async create(createPartnerDto: PartnerDto, photoFile: Multer.File): Promise<Partner> {
+    const filePath = `uploads/${photoFile.filename}`;
+    const partner = this.partnersRepository.create({
+      ...createPartnerDto,
+      PhotoURL: filePath, // Guarda la ruta del archivo en la BD
+    });
     return this.partnersRepository.save(partner);
   }
+
 
   findAll(): Promise<Partner[]> {
     return this.partnersRepository.find();
