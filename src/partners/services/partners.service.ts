@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Partner } from '../entities/partner.entity';
@@ -16,12 +16,26 @@ export class PartnersService {
   ) {}
 
   async create(createPartnerDto: PartnerDto, photoFile: Multer.File): Promise<Partner> {
-    const filePath = `uploads/${photoFile.filename}`;
-    const partner = this.partnersRepository.create({
-      ...createPartnerDto,
-      PhotoURL: filePath, // Guarda la ruta del archivo en la BD
-    });
-    return this.partnersRepository.save(partner);
+    try {
+      if (!photoFile) {
+        throw new Error('No se ha subido ningún archivo');
+      }
+  
+      const filePath = `uploads/${photoFile.filename}`;
+      const partner = this.partnersRepository.create({
+        ...createPartnerDto,
+        PhotoURL: filePath,
+      });
+  
+      return await this.partnersRepository.save(partner);
+    } catch (error) {
+      console.error('Error al crear el partner:', error.message);
+  
+      throw new HttpException(
+        { message: 'Error al registrar el partner', error: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
   }
 
 
