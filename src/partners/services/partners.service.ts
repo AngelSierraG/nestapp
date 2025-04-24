@@ -11,7 +11,7 @@ import * as Multer from 'multer';
 // 🔹 Mueve la configuración de Multer fuera de la clase
 const storage = Multer.diskStorage({
   destination: (req, file, cb) => {
-    const uploadPath = '/home/benemerito/public_html/uploads/';
+    const uploadPath = '/uploads/';
     cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
@@ -37,7 +37,7 @@ export class PartnersService {
       }
 
       // Generar la ruta correcta
-      const filePath = `/home/benemerito/public_html/uploads/${photoFile.filename}`;
+      const filePath = `/uploads/${photoFile.filename}`;
 
       const partner = this.partnersRepository.create({
         ...createPartnerDto,
@@ -77,7 +77,7 @@ export class PartnersService {
         let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
         if (photoFile && photoFile.filename) {
-            const uploadDir = '/home/benemerito/public_html/uploads/';
+            const uploadDir = '/uploads/';
             const newFilePath = path.join(uploadDir, photoFile.filename);
 
             // Verificar si existe una imagen anterior y eliminarla de manera segura
