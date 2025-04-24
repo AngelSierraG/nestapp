@@ -23,7 +23,7 @@ export class PartnersService {
         throw new Error('No se ha subido ningún archivo');
       }
   
-      const filePath = `uploads/${photoFile.filename}`;
+      const filePath = `../../../uploads/${photoFile.filename}`;
       const partner = this.partnersRepository.create({
         ...createPartnerDto,
         PhotoURL: filePath,
@@ -67,7 +67,7 @@ export class PartnersService {
           }
       
           // Definir la nueva ruta
-          const uploadDir = path.join(__dirname, '..', 'uploads');
+          const uploadDir = path.join(__dirname, '..', '../../..uploads');
           if (!fs.existsSync(uploadDir)) {
               fs.mkdirSync(uploadDir, { recursive: true });
           }
