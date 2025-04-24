@@ -24,7 +24,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config); 
   SwaggerModule.setup('api', app, document);
 
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+  app.use('/uploads', express.static('/home/benemerito/public_html/mynestapp.mayanappventure.mx/uploads'))
 
   await app.listen(process.env.PORT ?? 3000);
 
