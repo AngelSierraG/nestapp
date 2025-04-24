@@ -38,8 +38,17 @@ export class PartnersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: number, @Body() updatePartnerDto: PartnerDto) {
-    return this.partnersService.update(+id, updatePartnerDto);
+  @UseInterceptors(FileInterceptor('photo', {
+    storage: diskStorage({
+      destination: './uploads',
+      filename: (req, file, cb) => {
+        const uniqueName = `${Date.now()}-${file.originalname}`;
+        cb(null, uniqueName);
+      }
+    })
+  }))
+  async update(@Param('id') id: number, @Body() updatePartnerDto: PartnerDto, @UploadedFile() photoFile?: Multer.File) {
+    return this.partnersService.update(+id, updatePartnerDto, photoFile);
   }
 
   @Delete(':id')

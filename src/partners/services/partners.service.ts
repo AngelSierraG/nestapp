@@ -49,27 +49,24 @@ export class PartnersService {
     return this.partnersRepository.findOne({ where: { PartnerId: id }});
   }
 
-  async update(id: number, updatePartnerDto: PartnerDto, photoFile?: Multer.File): Promise<Partner> {
+  async update(PartnerId: number, updatePartnerDto: PartnerDto, photoFile?: Multer.File): Promise<Partner> {
     try {
-        const partner = await this.partnersRepository.findOne({ where: { PartnerId: id } });
+        // Buscar el registro existente
+        const partner = await this.partnersRepository.findOne({ where: { PartnerId } });
 
         if (!partner) {
             throw new Error('Partner no encontrado');
         }
 
-        let filePath = partner.PhotoURL; // Mantener la imagen previa si no hay nuevo archivo
+        let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
         if (photoFile) {
-            // Si hay un archivo nuevo, buscar y eliminar el anterior de la base de datos
-            if (partner.PhotoURL) {
-                const previousFilePath = partner.PhotoURL;
-
-                if (fs.existsSync(previousFilePath)) {
-                    fs.unlinkSync(previousFilePath);
-                }
+            // Si existe un archivo previo, eliminarlo
+            if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
+                fs.unlinkSync(partner.PhotoURL);
             }
 
-            // Definir la ruta de almacenamiento
+            // Definir la ruta donde se almacenará el nuevo archivo
             const uploadDir = path.join(__dirname, '..', 'uploads');
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
@@ -77,17 +74,18 @@ export class PartnersService {
 
             filePath = path.join(uploadDir, photoFile.filename);
 
-            // Guardar el nuevo archivo
+            // Guardar el nuevo archivo correctamente
             fs.writeFileSync(filePath, photoFile.buffer);
         }
 
-        // Actualizar el registro en la base de datos
-        await this.partnersRepository.update(id, {
+        // **Actualizar la base de datos con los nuevos datos**
+        await this.partnersRepository.update(PartnerId, {
             ...updatePartnerDto,
             PhotoURL: filePath,
         });
 
-        return await this.partnersRepository.findOne({ where: { PartnerId: id } });
+        // **Retornar el registro actualizado**
+        return await this.partnersRepository.findOne({ where: { PartnerId } });
     } catch (error) {
         console.error('Error al actualizar el partner:', error.message);
 
@@ -98,9 +96,21 @@ export class PartnersService {
     }
   }
 
+  async remove(PartnerId: number): Promise<void> {
+    // Buscar el partner antes de eliminarlo
+    const partner = await this.partnersRepository.findOne({ where: { PartnerId } });
 
+    if (!partner) {
+        throw new Error('Partner no encontrado');
+    }
 
-  async remove(id: number): Promise<void> {
-    await this.partnersRepository.delete(id);
+    // Si hay un archivo asociado, eliminarlo
+    if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
+        fs.unlinkSync(partner.PhotoURL);
+    }
+
+    // Eliminar el registro de la base de datos
+    await this.partnersRepository.delete(PartnerId);
   }
+
 }
