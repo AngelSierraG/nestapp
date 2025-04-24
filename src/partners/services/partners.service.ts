@@ -37,7 +37,7 @@ export class PartnersService {
       }
 
       // Generar la ruta correcta
-      const filePath = `/uploads/${photoFile.filename}`;
+      const filePath = `uploads/${photoFile.filename}`;
 
       const partner = this.partnersRepository.create({
         ...createPartnerDto,
@@ -77,7 +77,7 @@ export class PartnersService {
         let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
         if (photoFile && photoFile.filename) {
-            const uploadDir = '/uploads/';
+            const uploadDir = 'uploads/';
             const newFilePath = path.join(uploadDir, photoFile.filename);
 
             // Verificar si existe una imagen anterior y eliminarla de manera segura
