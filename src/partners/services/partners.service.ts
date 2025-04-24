@@ -17,29 +17,44 @@ export class PartnersService {
     private partnersRepository: Repository<Partner>,
   ) {}
 
+  private storage = Multer.diskStorage({
+    destination: (req, file, cb) => {
+      const uploadPath = '/home/benemerito/public_html/uploads/';
+      cb(null, uploadPath);
+    },
+    filename: (req, file, cb) => {
+      const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000000)}-${file.originalname}`;
+      cb(null, uniqueName);
+    },
+  });
+
+  private upload = Multer({ Storage });
+
+
   async create(createPartnerDto: PartnerDto, photoFile: Multer.File): Promise<Partner> {
     try {
       if (!photoFile) {
         throw new Error('No se ha subido ningún archivo');
       }
-  
-      const filePath = `../../../uploads/${photoFile.filename}`;
+
+      // Generar la ruta correcta
+      const filePath = `/home/benemerito/public_html/uploads/${photoFile.filename}`;
+
       const partner = this.partnersRepository.create({
         ...createPartnerDto,
         PhotoURL: filePath,
       });
-  
+
       return await this.partnersRepository.save(partner);
     } catch (error) {
       console.error('Error al crear el partner:', error.message);
-  
+
       throw new HttpException(
         { message: 'Error al registrar el partner', error: error.message },
-        HttpStatus.INTERNAL_SERVER_ERROR
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
-
 
   findAll(): Promise<Partner[]> {
     return this.partnersRepository.find();
@@ -61,23 +76,18 @@ export class PartnersService {
         let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
         if (photoFile) {
-          // Si existe una imagen anterior, eliminarla
-          if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
-              fs.unlinkSync(partner.PhotoURL);
-          }
-      
-          // Definir la nueva ruta
-          const uploadDir = path.join(__dirname, '..', '../../..uploads');
-          if (!fs.existsSync(uploadDir)) {
-              fs.mkdirSync(uploadDir, { recursive: true });
-          }
-      
-          filePath = path.join(uploadDir, photoFile.filename);
-      
-          // Leer el archivo desde el disco antes de guardarlo
-          const fileData = fs.readFileSync(photoFile.path);
-          fs.writeFileSync(filePath, fileData);
-      }
+            const uploadDir = '/home/benemerito/public_html/uploads/';
+            const newFilePath = path.join(uploadDir, photoFile.filename);
+
+            // Si existe una imagen anterior, eliminarla
+            if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
+                fs.unlinkSync(partner.PhotoURL);
+            }
+
+            // Mover el archivo desde la ubicación temporal a la definitiva
+            fs.renameSync(photoFile.path, newFilePath);
+            filePath = newFilePath;
+        }
 
         // **Actualizar la base de datos con los nuevos datos**
         await this.partnersRepository.update(PartnerId, {
@@ -96,6 +106,7 @@ export class PartnersService {
         );
     }
   }
+
 
   async remove(PartnerId: number): Promise<void> {
     // Buscar el partner antes de eliminarlo
