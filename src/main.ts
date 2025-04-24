@@ -17,7 +17,7 @@ async function bootstrap() {
   const config = new DocumentBuilder() 
   .setTitle('Cabañas API') 
   .setDescription('API para gestión de cabañas') 
-  .setVersion('24.04.25-7') 
+  .setVersion('24.04.25-8') 
   .addBearerAuth()
   .build(); 
 
