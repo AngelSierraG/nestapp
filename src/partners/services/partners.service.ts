@@ -8,6 +8,19 @@ import { PartnerDto } from '../dto/partner.dto';
 import * as Multer from 'multer';
 
 
+// 🔹 Mueve la configuración de Multer fuera de la clase
+const storage = Multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadPath = '/home/benemerito/public_html/uploads/';
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000000)}-${file.originalname}`;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = Multer({ storage });
 
 
 @Injectable()
@@ -16,21 +29,7 @@ export class PartnersService {
     @InjectRepository(Partner)
     private partnersRepository: Repository<Partner>,
   ) {}
-
-  private storage = Multer.diskStorage({
-    destination: (req, file, cb) => {
-      const uploadPath = '/home/benemerito/public_html/uploads/';
-      cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-      const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000000)}-${file.originalname}`;
-      cb(null, uniqueName);
-    },
-  });
-
-  private upload = Multer({ Storage });
-
-
+  
   async create(createPartnerDto: PartnerDto, photoFile: Multer.File): Promise<Partner> {
     try {
       if (!photoFile) {
@@ -56,6 +55,8 @@ export class PartnersService {
     }
   }
 
+  
+
   findAll(): Promise<Partner[]> {
     return this.partnersRepository.find();
   }
@@ -75,17 +76,20 @@ export class PartnersService {
 
         let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
-        if (photoFile) {
+        if (photoFile && photoFile.filename) {
             const uploadDir = '/home/benemerito/public_html/uploads/';
             const newFilePath = path.join(uploadDir, photoFile.filename);
 
-            // Si existe una imagen anterior, eliminarla
-            if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
-                fs.unlinkSync(partner.PhotoURL);
+            // Verificar si existe una imagen anterior y eliminarla de manera segura
+            if (partner.PhotoURL) {
+                const oldFilePath = path.resolve(partner.PhotoURL); // Normalizar ruta
+                if (fs.existsSync(oldFilePath)) {
+                    await fs.promises.unlink(oldFilePath);
+                }
             }
 
-            // Mover el archivo desde la ubicación temporal a la definitiva
-            fs.renameSync(photoFile.path, newFilePath);
+            // Mover el archivo desde la ubicación temporal a la definitiva de forma asincrónica
+            await fs.promises.rename(photoFile.path, newFilePath);
             filePath = newFilePath;
         }
 
@@ -106,7 +110,6 @@ export class PartnersService {
         );
     }
   }
-
 
   async remove(PartnerId: number): Promise<void> {
     // Buscar el partner antes de eliminarlo
