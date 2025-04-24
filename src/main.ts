@@ -17,14 +17,14 @@ async function bootstrap() {
   const config = new DocumentBuilder() 
   .setTitle('Cabañas API') 
   .setDescription('API para gestión de cabañas') 
-  .setVersion('24.04.25-6') 
+  .setVersion('24.04.25-7') 
   .addBearerAuth()
   .build(); 
 
   const document = SwaggerModule.createDocument(app, config); 
   SwaggerModule.setup('api', app, document);
 
-  app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+  app.use('/uploads', express.static('/home/benemerito/public_html/mynestapp.mayanappventure.mx/uploads'))
 
   await app.listen(process.env.PORT ?? 3000);
 
