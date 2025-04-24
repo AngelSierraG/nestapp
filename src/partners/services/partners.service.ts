@@ -61,22 +61,23 @@ export class PartnersService {
         let filePath = partner.PhotoURL; // Mantener la imagen anterior si no hay nuevo archivo
 
         if (photoFile) {
-            // Si existe un archivo previo, eliminarlo
-            if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
-                fs.unlinkSync(partner.PhotoURL);
-            }
-
-            // Definir la ruta donde se almacenará el nuevo archivo
-            const uploadDir = path.join(__dirname, '..', 'uploads');
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
-            filePath = path.join(uploadDir, photoFile.filename);
-
-            // Guardar el nuevo archivo correctamente
-            fs.writeFileSync(filePath, photoFile.buffer);
-        }
+          // Si existe una imagen anterior, eliminarla
+          if (partner.PhotoURL && fs.existsSync(partner.PhotoURL)) {
+              fs.unlinkSync(partner.PhotoURL);
+          }
+      
+          // Definir la nueva ruta
+          const uploadDir = path.join(__dirname, '..', 'uploads');
+          if (!fs.existsSync(uploadDir)) {
+              fs.mkdirSync(uploadDir, { recursive: true });
+          }
+      
+          filePath = path.join(uploadDir, photoFile.filename);
+      
+          // Leer el archivo desde el disco antes de guardarlo
+          const fileData = fs.readFileSync(photoFile.path);
+          fs.writeFileSync(filePath, fileData);
+      }
 
         // **Actualizar la base de datos con los nuevos datos**
         await this.partnersRepository.update(PartnerId, {
