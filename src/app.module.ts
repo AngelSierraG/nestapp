@@ -8,12 +8,14 @@ import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { LoggerMiddleware } from './logger.middleware';
 import { PartnersModule } from './partners/partners.module';
+import { TiposCabanasModule } from './tipos-cabanas/tipos-cabanas.module';
 import * as passport from 'passport'; // Importa passport
 
 @Module({
   imports: [TypeOrmModule.forRoot({ 
     type: 'mysql', 
-    host: 'localhost', 
+    host: 'localhost',
+    //host: '107.180.46.184', 
     port: 3306, 
     //username: 'root',
     username: 'chiapuf8_angel', 
@@ -26,7 +28,7 @@ import * as passport from 'passport'; // Importa passport
     entities: [__dirname + '/**/*.entity{.ts,.js}'
       //Cabana
     ],
-    }),  UsersModule, AuthModule, PartnersModule, 
+    }),  UsersModule, AuthModule, PartnersModule, TiposCabanasModule, 
   //CabanasModule
   ],
   controllers: [AppController],
